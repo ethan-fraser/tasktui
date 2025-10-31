@@ -1,14 +1,15 @@
 import React from 'react';
-import {Text} from 'ink';
+import { Box, Text } from 'ink';
+import SubprocessOutput from './components/SubprocessOutput.js';
 
-type Props = {
-	name: string | undefined;
-};
-
-export default function App({name = 'Stranger'}: Props) {
+export default function App() {
 	return (
-		<Text>
-			Hello, <Text color="green">{name}</Text>
-		</Text>
+		<Box gap={1}>
+			<Box borderTop={false} borderBottom={false} borderLeft={false} borderStyle="single">
+				<Text>Hello, world.</Text>
+			</Box>
+
+			<SubprocessOutput command={{ command: 'echo', args: ['Hello, world!']}} />
+		</Box>
 	);
 }
