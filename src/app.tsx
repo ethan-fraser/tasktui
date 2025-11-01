@@ -1,4 +1,4 @@
-import {Box, Text, useApp, useStdout} from 'ink';
+import {Box, Text, useApp, useInput, useStdout} from 'ink';
 import React, {useEffect, useState} from 'react';
 import SubprocessOutput from './components/SubprocessOutput.js';
 import {TasksConfig} from './lib/types.js';
@@ -10,12 +10,13 @@ export default function App(props: {config?: string}) {
 
 	const [config, setConfig] = useState<TasksConfig>();
 	const [error, setError] = useState<string | null>(null);
+	const [selectedTask, setSelectedTask] = useState<string>('');
 
 	useEffect(() => {
 		// Enter alternate screen mode
 		stdout.write('\x1b[2J\x1b[3J\x1b[H');
 
-		// Clean up: exit alternate screen mode when component unmounts
+		// Exit alternate screen mode when component unmounts
 		return () => {
 			stdout.write('\x1b[2J\x1b[3J\x1b[H');
 			exit();
@@ -24,13 +25,39 @@ export default function App(props: {config?: string}) {
 
 	useEffect(() => {
 		try {
-			setConfig(loadConfig(props.config));
+			const config = loadConfig(props.config);
+			setSelectedTask(Object.keys(config.tasks)[0] ?? '');
+			setConfig(config);
 		} catch (e) {
 			const error = ensureError(e);
 			setError(error.message);
 			setConfig(undefined);
 		}
 	}, [props.config]);
+
+	useInput((input, key) => {
+		if (key.upArrow || input === 'k') {
+			handleMove(1);
+		}
+
+		if (key.downArrow || input === 'j') {
+			handleMove(-1);
+		}
+
+		if (key.ctrl && input === 'c') {
+			// Handle Ctrl+C
+			process.exit(0);
+		}
+	});
+
+	function handleMove(steps: number) {
+		if (!config) return;
+		const tasks = Object.keys(config.tasks);
+		const selectedIndex = tasks.indexOf(selectedTask);
+		const newIndex = (selectedIndex + steps + tasks.length) % tasks.length;
+		const newTask = tasks[newIndex];
+		setSelectedTask(newTask ?? '');
+	}
 
 	if (error) return <Text color="redBright">{error}</Text>;
 	return (
@@ -46,12 +73,26 @@ export default function App(props: {config?: string}) {
 				borderLeft={false}
 				borderStyle="single"
 				flexDirection="column"
-				paddingRight={1}
+				justifyContent="space-between"
 			>
-				{config &&
-					Object.keys(config.tasks).map((name, i) => (
-						<Text key={i}>{name}</Text>
-					))}
+				<Box flexDirection="column">
+					<Text dimColor>Tasks</Text>
+					{config &&
+						Object.keys(config.tasks).map((name, i) => (
+							<Box key={i} justifyContent="space-between" gap={1}>
+								<Text color={selectedTask === name ? 'yellow' : undefined}>
+									{name}
+								</Text>
+								<Text color={selectedTask === name ? 'yellow' : undefined}>
+									»
+								</Text>
+							</Box>
+						))}
+				</Box>
+
+				<Box>
+					<Text dimColor>↑ ↓ - Select</Text>
+				</Box>
 			</Box>
 
 			<Box flexDirection="column" flexGrow={1}>

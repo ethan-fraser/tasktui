@@ -1,7 +1,6 @@
 {
 	"tasks": {
-		"sleep": {
-			"command": "sleep 10"
-		}
+		"sleep": {"command": "sleep 10"},
+		"this is fine": {"command": "echo oh shit"}
 	}
 }
