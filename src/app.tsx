@@ -140,7 +140,9 @@ export default function App(props: {config?: string; autoClose?: boolean}) {
 	}
 
 	function spawnTask(name: string, task: Task): void {
-		const subProcess = childProcess.spawn('sh', ['-c', task.command]);
+		const subProcess = childProcess.spawn('sh', ['-c', task.command], {
+			cwd: task.cwd,
+		});
 		subProcess.on('spawn', () => {
 			setBuffers(prev => {
 				if (!Object.keys(prev).length) {
