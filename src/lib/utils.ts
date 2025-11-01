@@ -48,23 +48,3 @@ export function ensureError(error: unknown): Error {
 
 	return new Error(stringified);
 }
-
-export function findProjectRoot(startDir = process.cwd()): string {
-	let currentDir = startDir;
-
-	while (true) {
-		const packageJsonPath = path.join(currentDir, 'package.json');
-		if (fs.existsSync(packageJsonPath)) {
-			return currentDir;
-		}
-
-		const parentDir = path.dirname(currentDir);
-
-		// Reached filesystem root
-		if (parentDir === currentDir) {
-			throw new Error('Could not find package.json in any parent directory');
-		}
-
-		currentDir = parentDir;
-	}
-}

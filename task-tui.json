@@ -2,13 +2,13 @@
 	"tasks": {
 		"thisisfine": {
 			"command": "sleep 3 && echo 'oh shit' && echo 'bye'",
-			"dependsOn": ["sleep"]
+			"dependsOn": ["sleep", "pwd"]
 		},
 		"sleep": {
 			"command": "sleep 3"
 		},
 		"pwd": {
-			"command": "pwd",
+			"command": "sleep 5 && pwd",
 			"cwd": "src/lib"
 		}
 	}
