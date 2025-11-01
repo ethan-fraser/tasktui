@@ -42,7 +42,6 @@ export function createUI(): UIComponents {
 	// Tasks list
 	const taskList = blessed.box({
 		parent: sidebar,
-		top: 1,
 		width: '100%',
 		height: 'shrink',
 		tags: true,
@@ -100,7 +99,7 @@ export function createUI(): UIComponents {
 		scrollbar: {
 			ch: '█',
 			style: {
-				fg: 'yellow',
+				fg: 'white',
 			},
 		},
 		keys: true,
