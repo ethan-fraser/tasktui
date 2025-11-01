@@ -3,9 +3,8 @@ import blessed from 'blessed';
 export interface UIComponents {
 	screen: blessed.Widgets.Screen;
 	sidebar: blessed.Widgets.BoxElement;
-	runningList: blessed.Widgets.BoxElement;
+	taskList: blessed.Widgets.BoxElement;
 	queueContainer: blessed.Widgets.BoxElement;
-	finishedContainer: blessed.Widgets.BoxElement;
 	taskNameBox: blessed.Widgets.BoxElement;
 	taskOutputBox: blessed.Widgets.Log;
 	errorBox: blessed.Widgets.BoxElement;
@@ -40,18 +39,18 @@ export function createUI(): UIComponents {
 		},
 	});
 
-	// Running section header
+	// Tasks list header
 	blessed.box({
 		parent: sidebar,
 		top: 0,
 		width: '100%',
 		height: 1,
-		content: '{gray-fg} Running{/}',
+		content: '{gray-fg}Tasks{/}',
 		tags: true,
 	});
 
-	// Running list
-	const runningList = blessed.box({
+	// Tasks list
+	const taskList = blessed.box({
 		parent: sidebar,
 		top: 1,
 		width: '100%',
@@ -63,15 +62,6 @@ export function createUI(): UIComponents {
 	const queueContainer = blessed.box({
 		parent: sidebar,
 		top: 'center',
-		width: '100%',
-		height: 'shrink',
-		tags: true,
-	});
-
-	// Finished section
-	const finishedContainer = blessed.box({
-		parent: sidebar,
-		bottom: 2,
 		width: '100%',
 		height: 'shrink',
 		tags: true,
@@ -155,9 +145,8 @@ export function createUI(): UIComponents {
 	return {
 		screen,
 		sidebar,
-		runningList,
+		taskList,
 		queueContainer,
-		finishedContainer,
 		taskNameBox,
 		taskOutputBox,
 		errorBox,

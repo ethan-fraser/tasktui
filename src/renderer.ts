@@ -9,18 +9,14 @@ export function showError(message: string, ui: UIComponents, state: AppState) {
 }
 
 export function render(ui: UIComponents, state: AppState): void {
-	// Update running list
-	const runningTasks = state.taskOrder.filter(
-		(name) => state.buffers[name]?.running,
-	);
-	const runningContent = runningTasks
+	const taskListContent = state.taskOrder
 		.map((name) => {
 			const color = getTaskNameColor(name, state);
 			const indicator = name === state.selectedTask ? '»' : ' ';
 			return `{${color}}${name}{/} ${indicator}`;
 		})
 		.join('\n');
-	ui.runningList.setContent(runningContent);
+	ui.taskList.setContent(taskListContent);
 
 	// Update queue
 	if (state.queue.length > 0) {
@@ -35,25 +31,6 @@ export function render(ui: UIComponents, state: AppState): void {
 		ui.queueContainer.show();
 	} else {
 		ui.queueContainer.hide();
-	}
-
-	// Update finished list
-	const finishedTasks = state.taskOrder.filter(
-		(name) => state.buffers[name] && !state.buffers[name].running,
-	);
-	if (finishedTasks.length > 0) {
-		const finishedContent =
-			'{gray-fg} Finished{/}\n' +
-			finishedTasks
-				.map((name) => {
-					const color = getTaskNameColor(name, state);
-					return `{${color}}${name}{/}`;
-				})
-				.join('\n');
-		ui.finishedContainer.setContent(finishedContent);
-		ui.finishedContainer.show();
-	} else {
-		ui.finishedContainer.hide();
 	}
 
 	// Update output pane

@@ -77,7 +77,7 @@ export function spawnTask(
 		const currentText = state.buffers[name]?.text ?? '';
 		state.buffers[name] = {
 			running: false,
-			text: currentText + `\n----\nDone (exit code: ${code})`,
+			text: currentText + `\n\nDone (exit code: ${code})`,
 			errored: code ? code > 0 : false,
 		};
 		state.childProcesses.delete(name);
