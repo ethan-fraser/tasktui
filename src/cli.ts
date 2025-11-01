@@ -3,25 +3,22 @@ import meow from 'meow';
 import ui, { loadAndProcessConfig } from './app.js';
 
 const cli = meow(
-	`
+  `
 	Usage
-	  $ tasktui
+	  $ tasktui [--config <PATH> | --help]
 
 	Options
-		--config Path to config file
-
-	Examples
-	  $ tasktui
-	  $ tasktui --config=./my-tasks.json
+		--config Path to config file (default: ./tasktui.config.json)
 `,
-	{
-		importMeta: import.meta,
-		flags: {
-			config: {
-				type: 'string',
-			},
-		},
-	},
+  {
+    importMeta: import.meta,
+    flags: {
+      config: {
+        type: 'string',
+      },
+      help: {},
+    },
+  },
 );
 
 loadAndProcessConfig(cli.flags.config);
