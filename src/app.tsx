@@ -43,25 +43,29 @@ const sidebar = blessed.box({
 	top: 0,
 	width: 25,
 	height: '100%',
-	borderRight: {
-		type: 'line',
-	},
+});
+
+// Add a vertical line separator
+blessed.line({
+	parent: screen,
+	orientation: 'vertical',
+	left: 24,
+	top: 0,
+	height: '100%',
 	style: {
-		border: {
-			fg: 'white',
-		},
+		fg: 'white',
 	},
 });
 
 // Running section
-// const runningHeader = blessed.box({
-// 	parent: sidebar,
-// 	top: 0,
-// 	width: '100%',
-// 	height: 1,
-// 	content: '{gray-fg} Running{/}',
-// 	tags: true,
-// });
+blessed.box({
+	parent: sidebar,
+	top: 0,
+	width: '100%',
+	height: 1,
+	content: '{gray-fg} Running{/}',
+	tags: true,
+});
 
 const runningList = blessed.box({
 	parent: sidebar,
@@ -90,14 +94,14 @@ const finishedContainer = blessed.box({
 });
 
 // Help text at bottom
-// const helpText = blessed.box({
-// 	parent: sidebar,
-// 	bottom: 0,
-// 	width: '100%',
-// 	height: 1,
-// 	content: '{gray-fg}↑ ↓ - Select{/}',
-// 	tags: true,
-// });
+blessed.box({
+	parent: sidebar,
+	bottom: 0,
+	width: '100%',
+	height: 1,
+	content: '{gray-fg}↑ ↓ - Select{/}',
+	tags: true,
+});
 
 // Output pane container
 const outputPane = blessed.box({
@@ -186,7 +190,7 @@ function render() {
 	// Update queue
 	if (state.queue.length > 0) {
 		const queueContent =
-			'{gray-fg} Queue{/}\n' +
+			'{gray-fg} Queue{/}\n' +
 			state.queue
 				.map(({ name, remainingDeps }) => {
 					return `{gray-fg}${name} (${remainingDeps.length}){/}`;
@@ -204,7 +208,7 @@ function render() {
 	);
 	if (finishedTasks.length > 0) {
 		const finishedContent =
-			'{gray-fg} Finished{/}\n' +
+			'{gray-fg} Finished{/}\n' +
 			finishedTasks
 				.map((name) => {
 					const color = getTaskNameColor(name);
