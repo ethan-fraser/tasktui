@@ -1,6 +1,6 @@
 import {Box, Text, useApp, useInput, useStdout} from 'ink';
 import childProcess from 'node:child_process';
-import React, {useEffect, useState} from 'react';
+import React, {useEffect, useRef, useState} from 'react';
 import {Task, TasksConfig} from './lib/types.js';
 import {ensureError, loadConfig} from './lib/utils.js';
 
@@ -10,15 +10,23 @@ interface TaskBuffer {
 	text: string;
 }
 
+interface QueueItem {
+	name: string;
+	task: Task;
+	remainingDeps: string[];
+}
+
 export default function App(props: {config?: string}) {
 	const {stdout} = useStdout();
 	const {exit} = useApp();
 
+	const init = useRef(false);
 	const [config, setConfig] = useState<TasksConfig>();
 	const [tasks, setTasks] = useState<Record<string, Task>>({});
 	const [error, setError] = useState<string | null>(null);
 	const [selectedTask, setSelectedTask] = useState<string>('');
 	const [buffers, setBuffers] = useState<Record<string, TaskBuffer>>({});
+	const [queue, setQueue] = useState<QueueItem[]>([]);
 
 	useEffect(() => {
 		// Enter alternate screen mode
@@ -34,7 +42,6 @@ export default function App(props: {config?: string}) {
 	useEffect(() => {
 		try {
 			const config = loadConfig(props.config);
-			setSelectedTask(Object.keys(config.tasks)[0] ?? '');
 			setConfig(config);
 		} catch (e) {
 			const error = ensureError(e);
@@ -44,48 +51,73 @@ export default function App(props: {config?: string}) {
 	}, [props.config]);
 
 	useEffect(() => {
-		setTasks(config?.tasks ?? {});
+		const tasks = config?.tasks ?? {};
+		if (!Object.keys(tasks).length && init.current) {
+			process.exit(0);
+		}
+		init.current = true;
+		setTasks(tasks);
 	}, [config]);
 
 	useEffect(() => {
 		for (const [name, task] of Object.entries(tasks)) {
-			const subProcess = childProcess.spawn('sh', ['-c', task.command]);
-			subProcess.on('spawn', () => {
-				setBuffers(prev => {
-					return {...prev, [name]: {running: true, text: '', errored: false}};
-				});
-			});
-			subProcess.stdout.on('data', (newOutput: Buffer) => {
-				const text = newOutput.toString('utf8').trim();
-				console.log('got data for', name, text);
-				setBuffers(prev => {
-					const currentText = prev[name]?.text ?? '';
-					return {
-						...prev,
-						[name]: {running: true, text: currentText + text, errored: false},
-					};
-				});
-			});
-			subProcess.on('close', code => {
-				console.log(name, 'closed', code);
-				setBuffers(prev => {
-					const currentText = prev[name]?.text ?? '';
-					return {
-						...prev,
-						[name]: {
-							running: false,
-							text: currentText + `\n----\nDone (exit code: ${code})`,
-							errored: code ? code > 0 : false,
-						},
-					};
-				});
-			});
+			if (task.dependsOn.length) {
+				let allDepsExist = ensureDependencies(name, task.dependsOn);
+				if (!allDepsExist) continue;
+				setQueue(prev => [
+					...prev,
+					{name, task, remainingDeps: task.dependsOn},
+				]);
+				continue;
+			}
+
+			// no dependencies, spawn now
+			spawnTask(name, task);
 		}
 	}, [tasks]);
 
 	useEffect(() => {
 		if (!Object.values(buffers).length) return;
-		if (Object.values(buffers).every(task => !task.running)) process.exit(0);
+
+		// Check if deps of queue items have finished
+		for (const [task, buffer] of Object.entries(buffers)) {
+			console.log('checking deps for', task);
+			if (buffer.running || buffer.errored) {
+				console.log(task, 'is still running or errored');
+				continue;
+			}
+
+			setQueue(prev => {
+				const next: QueueItem[] = [];
+
+				for (const queueItem of prev) {
+					if (queueItem.remainingDeps.includes(task)) {
+						console.log(queueItem.name, 'has it as a dep');
+						console.log('remaining:', queueItem.remainingDeps);
+						// Remove the completed dependency
+						const remaining = queueItem.remainingDeps.filter(
+							dep => dep !== task,
+						);
+
+						console.log('remaining now:', remaining);
+						if (remaining.length === 0) {
+							// All deps finished, spawn process and remove from queue
+							console.log('spawning', queueItem.name);
+							spawnTask(queueItem.name, queueItem.task);
+							continue; // Don't add to next queue
+						}
+
+						// Still has deps, add with updated list
+						next.push({...queueItem, remainingDeps: remaining});
+					} else {
+						// No change needed, keep in queue
+						next.push(queueItem);
+					}
+				}
+
+				return next;
+			});
+		}
 	}, [buffers]);
 
 	useInput((input, key) => {
@@ -103,8 +135,63 @@ export default function App(props: {config?: string}) {
 		}
 	});
 
-	function handleMove(steps: number) {
-		const taskNames = Object.keys(tasks);
+	function ensureDependencies(task: string, deps: string[]): boolean {
+		let allDepsExist = true;
+		for (const dep of deps) {
+			if (!Object.keys(tasks).includes(dep)) {
+				setBuffers(prev => ({
+					...prev,
+					[task]: {
+						running: false,
+						text: `Cannot depend on ${dep} as it does not exist`,
+						errored: true,
+					},
+				}));
+				allDepsExist = false;
+				break;
+			}
+		}
+		return allDepsExist;
+	}
+
+	function spawnTask(name: string, task: Task): void {
+		const subProcess = childProcess.spawn('sh', ['-c', task.command]);
+		subProcess.on('spawn', () => {
+			setBuffers(prev => {
+				if (!Object.keys(prev).length) {
+					// nothing will be selected yet
+					setSelectedTask(name);
+				}
+				return {...prev, [name]: {running: true, text: '', errored: false}};
+			});
+		});
+		subProcess.stdout.on('data', (newOutput: Buffer) => {
+			const text = newOutput.toString('utf8').trim();
+			setBuffers(prev => {
+				const currentText = prev[name]?.text ?? '';
+				return {
+					...prev,
+					[name]: {running: true, text: currentText + text, errored: false},
+				};
+			});
+		});
+		subProcess.on('close', code => {
+			setBuffers(prev => {
+				const currentText = prev[name]?.text ?? '';
+				return {
+					...prev,
+					[name]: {
+						running: false,
+						text: currentText + `\n----\nDone (exit code: ${code})`,
+						errored: code ? code > 0 : false,
+					},
+				};
+			});
+		});
+	}
+
+	function handleMove(steps: number): void {
+		const taskNames = Object.keys(buffers);
 		const selectedIndex = taskNames.indexOf(selectedTask);
 		const newIndex =
 			(selectedIndex + steps + taskNames.length) % taskNames.length;
@@ -114,9 +201,10 @@ export default function App(props: {config?: string}) {
 
 	function getTaskNameColor(task: string): {color: string; dim: boolean} {
 		const buffer = buffers[task];
+		if (!buffer) return {color: 'white', dim: false};
 		if (selectedTask === task) return {color: 'yellow', dim: false};
-		if (buffer?.errored) return {color: 'red', dim: true};
-		if (buffer?.running) return {color: 'white', dim: false};
+		if (buffer.errored) return {color: 'red', dim: true};
+		if (buffer.running) return {color: 'white', dim: false};
 		return {color: 'white', dim: true};
 	}
 
@@ -137,24 +225,72 @@ export default function App(props: {config?: string}) {
 				justifyContent="space-between"
 			>
 				<Box flexDirection="column">
-					<Text dimColor>Tasks</Text>
-					{Object.keys(tasks).map((name, i) => (
-						<Box key={i} justifyContent="space-between" gap={1}>
-							<Text
-								color={getTaskNameColor(name).color}
-								dimColor={getTaskNameColor(name).dim}
-							>
-								{name}
-							</Text>
-							<Text
-								color={getTaskNameColor(name).color}
-								dimColor={getTaskNameColor(name).dim}
-							>
-								»
-							</Text>
-						</Box>
-					))}
+					<Text dimColor> Running</Text>
+					{Object.entries(buffers)
+						.filter(([_, b]) => b.running)
+						.map(([name], i) => (
+							<Box key={i} justifyContent="space-between" gap={1}>
+								<Text
+									color={getTaskNameColor(name).color}
+									dimColor={getTaskNameColor(name).dim}
+								>
+									{name}
+								</Text>
+								<Text
+									color={getTaskNameColor(name).color}
+									dimColor={getTaskNameColor(name).dim}
+								>
+									»
+								</Text>
+							</Box>
+						))}
 				</Box>
+
+				{Object.keys(queue).length > 0 && (
+					<Box flexDirection="column">
+						<Text dimColor> Queue</Text>
+						{queue.map(({name, remainingDeps}, i) => (
+							<Box key={i} justifyContent="space-between" gap={1}>
+								<Text
+									color={getTaskNameColor(name).color}
+									dimColor={getTaskNameColor(name).dim}
+								>
+									{name}
+								</Text>
+								<Text
+									color={getTaskNameColor(name).color}
+									dimColor={getTaskNameColor(name).dim}
+								>
+									({remainingDeps.length})
+								</Text>
+							</Box>
+						))}
+					</Box>
+				)}
+
+				{Object.entries(buffers).filter(([_, b]) => !b.running).length > 0 && (
+					<Box flexDirection="column">
+						<Text dimColor> Finished</Text>
+						{Object.entries(buffers)
+							.filter(([_, b]) => !b.running)
+							.map(([name], i) => (
+								<Box key={i} justifyContent="space-between" gap={1}>
+									<Text
+										color={getTaskNameColor(name).color}
+										dimColor={getTaskNameColor(name).dim}
+									>
+										{name}
+									</Text>
+									<Text
+										color={getTaskNameColor(name).color}
+										dimColor={getTaskNameColor(name).dim}
+									>
+										»
+									</Text>
+								</Box>
+							))}
+					</Box>
+				)}
 
 				<Box>
 					<Text dimColor>↑ ↓ - Select</Text>

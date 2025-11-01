@@ -1,6 +1,11 @@
 {
 	"tasks": {
-		"thisisfine": {"command": "sleep 5 && echo 'oh shit' && echo 'bye'"},
-		"sleep": {"command": "sleep 3 && exit 1", "ephemeral": true}
+		"thisisfine": {
+			"command": "sleep 3 && echo 'oh shit' && echo 'bye'",
+			"dependsOn": ["sleep"]
+		},
+		"sleep": {
+			"command": "sleep 3"
+		}
 	}
 }

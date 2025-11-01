@@ -2,7 +2,7 @@ import z from 'zod';
 
 export const TaskSchema = z.object({
 	command: z.string(),
-	ephemeral: z.boolean().default(false),
+	dependsOn: z.string().array().default([]),
 });
 export type Task = z.infer<typeof TaskSchema>;
 
