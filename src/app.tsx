@@ -1,29 +1,35 @@
 import {Box, Text} from 'ink';
-import React, {useState} from 'react';
+import React, {useEffect, useState} from 'react';
 // import SubprocessOutput from './components/SubprocessOutput.js';
 import fs from 'node:fs';
 import path from 'node:path';
 import url from 'node:url';
-import {CONFIG_PATH} from './lib/constants.js';
+import {ensureError, getConfigPath} from './lib/utils.js';
 
 const __dirname = path.dirname(url.fileURLToPath(import.meta.url));
-
 export default function App(props: {config?: string}) {
 	const [config, setConfig] = useState();
+	const [error, setError] = useState<string | null>(null);
 
-	let configPath = props.config;
-	if (!configPath) configPath = CONFIG_PATH;
+	useEffect(() => {
+		try {
+			const configPath = path.join(
+				__dirname,
+				'..',
+				getConfigPath(props.config),
+			);
+			const raw = fs.readFileSync(configPath, 'utf-8');
+			const parsed = JSON.parse(raw);
+			setConfig(parsed);
+			setError(null);
+		} catch (e) {
+			const error = ensureError(e);
+			setError(error.message);
+			setConfig(undefined);
+		}
+	}, [props.config]);
 
-	const rawConfig = fs.readFileSync(path.join(__dirname, configPath), {
-		encoding: 'utf-8',
-	});
-	try {
-		const parsedConfig = JSON.parse(rawConfig);
-		setConfig(parsedConfig);
-	} catch (e) {
-		throw new Error('Failed to parse config file', {cause: e});
-	}
-
+	if (error) return <Text color="redBright">{error}</Text>;
 	return (
 		<Box gap={1}>
 			<Box
@@ -32,7 +38,7 @@ export default function App(props: {config?: string}) {
 				borderLeft={false}
 				borderStyle="single"
 			>
-				<Text>{config}</Text>
+				<Text>{JSON.stringify(config)}</Text>
 			</Box>
 
 			{/* <SubprocessOutput command={{ command: 'echo', args: ['Hello, world!']}} /> */}
