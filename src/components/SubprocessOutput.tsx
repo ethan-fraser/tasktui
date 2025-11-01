@@ -9,10 +9,10 @@ export default function SubprocessOutput({command}: {command: string}) {
 	useEffect(() => {
 		const subProcess = childProcess.spawn('sh', ['-c', command]);
 		subProcess.stdout.on('data', (newOutput: Buffer) => {
-			const lines = stripAnsi(newOutput.toString('utf8')).split('\n');
-			setOutput(lines.join('\n'));
+			const text = stripAnsi(newOutput.toString('utf8')).trim();
+			setOutput(text);
 		});
-	}, [setOutput]);
+	}, [command]);
 
 	return (
 		<Box>
