@@ -32,7 +32,6 @@ export function spawnTask(
   state: AppState,
   onUpdate: () => void,
 ): void {
-  console.log(task.command);
   const subProcess = childProcess.spawn('sh', ['-c', task.command], {
     cwd: task.cwd,
     env: {
