@@ -1,6 +1,5 @@
 import fs from 'node:fs';
 import path from 'node:path';
-import {fileURLToPath} from 'node:url';
 import z from 'zod';
 import {CONFIG_PATH} from './constants.js';
 import {TasksConfig, TasksConfigSchema} from './types.js';
@@ -20,14 +19,9 @@ export default function formatZodError(error: z.ZodError): string {
 	return `${issue.message} at '${path}' [code: ${issue.code}]`;
 }
 
-const __dirname = path.dirname(fileURLToPath(import.meta.url));
 export function loadConfig(configPath?: string): TasksConfig {
 	try {
-		const relativePath = path.join(
-			__dirname,
-			'../..',
-			getConfigPath(configPath),
-		);
+		const relativePath = path.join(process.cwd(), getConfigPath(configPath));
 		const raw = fs.readFileSync(relativePath, 'utf-8');
 		const parsed = JSON.parse(raw);
 		return z.parse(TasksConfigSchema, parsed);
