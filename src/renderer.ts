@@ -45,8 +45,7 @@ export function render(ui: UIComponents, state: AppState): void {
 			const symbol = isSelected ? '›' : ' ';
 
 			let statusSymbol = '✓';
-			let color = 'green-fg';
-
+			let color = 'gray-fg';
 			if (buffer?.errored) {
 				statusSymbol = '✗';
 				color = 'red-fg';
