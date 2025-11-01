@@ -30,6 +30,11 @@ export function spawnTask(
 ): void {
 	const subProcess = childProcess.spawn('sh', ['-c', task.command], {
 		cwd: task.cwd,
+		env: {
+			...process.env,
+			FORCE_COLOR: '1',
+			CLICOLOR_FORCE: '1',
+		},
 	});
 	state.childProcesses.set(name, subProcess);
 
