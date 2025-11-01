@@ -1,3 +1,3 @@
-const CONFIG_PATH = './task-tui.config.json';
+const CONFIG_PATH = './tasktui.config.json';
 
-export {CONFIG_PATH};
+export { CONFIG_PATH };
