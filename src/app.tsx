@@ -84,44 +84,25 @@ export default function App(props: {config?: string; autoClose?: boolean}) {
 		if (!Object.values(buffers).length) return;
 
 		// Check if deps of queue items have finished
-		for (const [task, buffer] of Object.entries(buffers)) {
-			console.log('checking deps for', task);
-			if (buffer.running || buffer.errored) {
-				console.log(task, 'is still running or errored');
-				continue;
-			}
+		setQueue(prev => {
+			const next: QueueItem[] = [];
 
-			setQueue(prev => {
-				const next: QueueItem[] = [];
+			for (const queueItem of prev) {
+				const remaining = queueItem.remainingDeps.filter(dep => {
+					const buffer = buffers[dep];
+					return buffer?.running || buffer?.errored || !buffer;
+				});
 
-				for (const queueItem of prev) {
-					if (queueItem.remainingDeps.includes(task)) {
-						console.log(queueItem.name, 'has it as a dep');
-						console.log('remaining:', queueItem.remainingDeps);
-						// Remove the completed dependency
-						const remaining = queueItem.remainingDeps.filter(
-							dep => dep !== task,
-						);
-
-						console.log('remaining now:', remaining);
-						if (remaining.length === 0) {
-							// All deps finished, spawn process and remove from queue
-							console.log('spawning', queueItem.name);
-							spawnTask(queueItem.name, queueItem.task);
-							continue; // Don't add to next queue
-						}
-
-						// Still has deps, add with updated list
-						next.push({...queueItem, remainingDeps: remaining});
-					} else {
-						// No change needed, keep in queue
-						next.push(queueItem);
-					}
+				if (remaining.length === 0) {
+					spawnTask(queueItem.name, queueItem.task);
+					continue;
 				}
 
-				return next;
-			});
-		}
+				next.push({...queueItem, remainingDeps: remaining});
+			}
+
+			return next;
+		});
 	}, [buffers]);
 
 	useInput((input, key) => {
