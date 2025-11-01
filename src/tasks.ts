@@ -1,6 +1,6 @@
 import childProcess from 'node:child_process';
-import { Task } from './lib/types.js';
 import { AppState, QueueItem } from './state.js';
+import { Task } from './types.js';
 
 export function ensureDependencies(
 	task: string,

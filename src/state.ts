@@ -1,5 +1,5 @@
 import childProcess from 'node:child_process';
-import { Task, TasksConfig } from './lib/types.js';
+import { Task, TasksConfig } from './types.js';
 
 export interface TaskBuffer {
 	running: boolean;

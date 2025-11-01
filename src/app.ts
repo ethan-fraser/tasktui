@@ -1,8 +1,8 @@
-import { ensureError, loadConfig } from './lib/utils.js';
 import { render, showError } from './renderer.js';
 import { createState } from './state.js';
 import { cleanup, ensureDependencies, spawnTask } from './tasks.js';
 import { createUI } from './ui.js';
+import { ensureError, loadConfig } from './utils.js';
 
 const ui = createUI();
 const state = createState();
