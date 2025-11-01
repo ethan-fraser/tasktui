@@ -1,8 +1,8 @@
 import fs from 'node:fs';
 import path from 'node:path';
 import z from 'zod';
-import {CONFIG_PATH} from './constants.js';
-import {TasksConfig, TasksConfigSchema} from './types.js';
+import { CONFIG_PATH } from './constants.js';
+import { TasksConfig, TasksConfigSchema } from './types.js';
 
 function getConfigPath(cliOption?: string): string {
 	if (cliOption) return cliOption;

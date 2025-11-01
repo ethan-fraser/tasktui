@@ -1,8 +1,6 @@
 #!/usr/bin/env node
-import {render} from 'ink';
 import meow from 'meow';
-import React from 'react';
-import App from './app.js';
+import screen, { loadAndProcessConfig } from './app.js';
 
 const cli = meow(
 	`
@@ -10,11 +8,11 @@ const cli = meow(
 	  $ task-tui
 
 	Options
-		--config path/to/file
+		--config, -c  Path to config file
 
 	Examples
-	  $ task-tui --name=Jane
-	  Hello, Jane
+	  $ task-tui
+	  $ task-tui --config=./my-tasks.json
 `,
 	{
 		importMeta: import.meta,
@@ -27,4 +25,5 @@ const cli = meow(
 	},
 );
 
-render(<App config={cli.flags.config} />);
+loadAndProcessConfig(cli.flags.config);
+screen.render();
