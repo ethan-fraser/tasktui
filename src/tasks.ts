@@ -43,11 +43,11 @@ export function spawnTask(
 			state.selectedTask = name;
 		}
 		state.buffers[name] = { running: true, text: '', errored: false };
-		state.taskOrder.push(name);
+		state.taskOrder.unshift(name);
 		onUpdate();
 	});
 
-	subProcess.stdout.on('data', (newOutput: Buffer) => {
+	const handleOutput = (newOutput: Buffer) => {
 		const text = newOutput.toString('utf8');
 		const currentText = state.buffers[name]?.text ?? '';
 		state.buffers[name] = {
@@ -58,26 +58,15 @@ export function spawnTask(
 		if (state.selectedTask === name) {
 			onUpdate();
 		}
-	});
-
-	subProcess.stderr.on('data', (newOutput: Buffer) => {
-		const text = newOutput.toString('utf8');
-		const currentText = state.buffers[name]?.text ?? '';
-		state.buffers[name] = {
-			running: true,
-			text: currentText + text,
-			errored: false,
-		};
-		if (state.selectedTask === name) {
-			onUpdate();
-		}
-	});
+	};
+	subProcess.stdout.on('data', handleOutput);
+	subProcess.stderr.on('data', handleOutput);
 
 	subProcess.on('close', (code) => {
 		const currentText = state.buffers[name]?.text ?? '';
 		state.buffers[name] = {
 			running: false,
-			text: currentText + `\n\nDone (exit code: ${code})`,
+			text: currentText + `\nDone (exit code: ${code})`,
 			errored: code ? code > 0 : false,
 		};
 		state.childProcesses.delete(name);
@@ -88,7 +77,7 @@ export function spawnTask(
 	});
 }
 
-export function checkQueue(state: AppState, onUpdate: () => void): void {
+function checkQueue(state: AppState, onUpdate: () => void): void {
 	const next: QueueItem[] = [];
 
 	for (const queueItem of state.queue) {
