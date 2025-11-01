@@ -1,27 +1,16 @@
 import {Box, Text} from 'ink';
 import React, {useEffect, useState} from 'react';
 // import SubprocessOutput from './components/SubprocessOutput.js';
-import fs from 'node:fs';
-import path from 'node:path';
-import url from 'node:url';
-import {ensureError, getConfigPath} from './lib/utils.js';
+import {TasksConfig} from './lib/types.js';
+import {ensureError, loadConfig} from './lib/utils.js';
 
-const __dirname = path.dirname(url.fileURLToPath(import.meta.url));
 export default function App(props: {config?: string}) {
-	const [config, setConfig] = useState();
+	const [config, setConfig] = useState<TasksConfig>();
 	const [error, setError] = useState<string | null>(null);
 
 	useEffect(() => {
 		try {
-			const configPath = path.join(
-				__dirname,
-				'..',
-				getConfigPath(props.config),
-			);
-			const raw = fs.readFileSync(configPath, 'utf-8');
-			const parsed = JSON.parse(raw);
-			setConfig(parsed);
-			setError(null);
+			setConfig(loadConfig(props.config));
 		} catch (e) {
 			const error = ensureError(e);
 			setError(error.message);
