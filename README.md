@@ -5,13 +5,13 @@ Run tasks in a multiplexed terminal with dependency management.
 ## Install
 
 ```sh
-$ npm install --save-dev task-tui
+$ npm install --save-dev tasktui
 ```
 
 ## Usage
 
 ```
-$ task-tui --help
+$ tasktui --help
 
 	Usage
 	  $ tasktui [--config <PATH> | --help]
