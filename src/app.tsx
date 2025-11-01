@@ -1,12 +1,26 @@
-import {Box, Text} from 'ink';
+import {Box, Text, useApp, useStdout} from 'ink';
 import React, {useEffect, useState} from 'react';
 import SubprocessOutput from './components/SubprocessOutput.js';
 import {TasksConfig} from './lib/types.js';
 import {ensureError, loadConfig} from './lib/utils.js';
 
 export default function App(props: {config?: string}) {
+	const {stdout} = useStdout();
+	const {exit} = useApp();
+
 	const [config, setConfig] = useState<TasksConfig>();
 	const [error, setError] = useState<string | null>(null);
+
+	useEffect(() => {
+		// Enter alternate screen mode
+		stdout.write('\x1b[2J\x1b[3J\x1b[H');
+
+		// Clean up: exit alternate screen mode when component unmounts
+		return () => {
+			stdout.write('\x1b[2J\x1b[3J\x1b[H');
+			exit();
+		};
+	}, [stdout]);
 
 	useEffect(() => {
 		try {
@@ -20,7 +34,12 @@ export default function App(props: {config?: string}) {
 
 	if (error) return <Text color="redBright">{error}</Text>;
 	return (
-		<Box gap={1}>
+		<Box
+			width={stdout.columns}
+			height={stdout.rows - 1} // -1 to avoid overflow
+			flexDirection="row"
+			gap={1}
+		>
 			<Box
 				borderTop={false}
 				borderBottom={false}
@@ -35,7 +54,7 @@ export default function App(props: {config?: string}) {
 					))}
 			</Box>
 
-			<Box flexDirection="column">
+			<Box flexDirection="column" flexGrow={1}>
 				{config &&
 					Object.values(config.tasks).map((task, i) => (
 						<SubprocessOutput key={i} command={task.command} />

@@ -1,13 +1,7 @@
 {
 	"tasks": {
-		"print": {
-			"command": "echo \"Hello, world!\""
-		},
-		"pwd": {
-			"command": "pwd"
-		},
-		"wc": {
-			"command": "cat src/app.tsx | wc -l"
+		"sleep": {
+			"command": "sleep 10"
 		}
 	}
 }
