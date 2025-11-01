@@ -1,6 +1,7 @@
 import {Box, Text, useApp, useInput, useStdout} from 'ink';
+import childProcess from 'node:child_process';
 import React, {useEffect, useState} from 'react';
-import SubprocessOutput from './components/SubprocessOutput.js';
+import stripAnsi from 'strip-ansi';
 import {TasksConfig} from './lib/types.js';
 import {ensureError, loadConfig} from './lib/utils.js';
 
@@ -11,6 +12,7 @@ export default function App(props: {config?: string}) {
 	const [config, setConfig] = useState<TasksConfig>();
 	const [error, setError] = useState<string | null>(null);
 	const [selectedTask, setSelectedTask] = useState<string>('');
+	const [buffers, setBuffers] = useState<Record<string, string>>({});
 
 	useEffect(() => {
 		// Enter alternate screen mode
@@ -34,6 +36,19 @@ export default function App(props: {config?: string}) {
 			setConfig(undefined);
 		}
 	}, [props.config]);
+
+	useEffect(() => {
+		if (!config) return;
+		for (const [name, task] of Object.entries(config.tasks)) {
+			const subProcess = childProcess.spawn('sh', ['-c', task.command]);
+			subProcess.stdout.on('data', (newOutput: Buffer) => {
+				const text = stripAnsi(newOutput.toString('utf8')).trim();
+				setBuffers(prev => {
+					return {...prev, [name]: text};
+				});
+			});
+		}
+	}, [config]);
 
 	useInput((input, key) => {
 		if (key.upArrow || input === 'k') {
@@ -96,10 +111,8 @@ export default function App(props: {config?: string}) {
 			</Box>
 
 			<Box flexDirection="column" flexGrow={1}>
-				{config &&
-					Object.values(config.tasks).map((task, i) => (
-						<SubprocessOutput key={i} command={task.command} />
-					))}
+				<Text dimColor>{selectedTask}</Text>
+				<Text>{buffers[selectedTask] ?? ''}</Text>
 			</Box>
 		</Box>
 	);
