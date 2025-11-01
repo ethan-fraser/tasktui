@@ -22,6 +22,7 @@ export default function App(props: {config?: string; autoClose?: boolean}) {
 
 	const init = useRef(false);
 	const spawnedTasks = useRef(new Set<string>());
+	const [taskOrder, setTaskOrder] = useState<string[]>([]);
 	const [config, setConfig] = useState<TasksConfig>();
 	const [tasks, setTasks] = useState<Record<string, Task>>({});
 	const [error, setError] = useState<string | null>(null);
@@ -118,11 +119,11 @@ export default function App(props: {config?: string; autoClose?: boolean}) {
 
 	useInput((input, key) => {
 		if (key.upArrow || input === 'k') {
-			handleMove(1);
+			handleMove(-1);
 		}
 
 		if (key.downArrow || input === 'j') {
-			handleMove(-1);
+			handleMove(1);
 		}
 
 		if (key.ctrl && input === 'c') {
@@ -162,6 +163,7 @@ export default function App(props: {config?: string; autoClose?: boolean}) {
 				}
 				return {...prev, [name]: {running: true, text: '', errored: false}};
 			});
+			setTaskOrder(prev => [...prev, name]);
 		});
 		subProcess.stdout.on('data', (newOutput: Buffer) => {
 			const text = newOutput.toString('utf8').trim();
@@ -189,11 +191,10 @@ export default function App(props: {config?: string; autoClose?: boolean}) {
 	}
 
 	function handleMove(steps: number): void {
-		const taskNames = Object.keys(buffers);
-		const selectedIndex = taskNames.indexOf(selectedTask);
+		const selectedIndex = taskOrder.indexOf(selectedTask);
 		const newIndex =
-			(selectedIndex + steps + taskNames.length) % taskNames.length;
-		const newTask = taskNames[newIndex];
+			(selectedIndex + steps + taskOrder.length) % taskOrder.length;
+		const newTask = taskOrder[newIndex];
 		setSelectedTask(newTask ?? '');
 	}
 
@@ -224,9 +225,9 @@ export default function App(props: {config?: string; autoClose?: boolean}) {
 			>
 				<Box flexDirection="column">
 					<Text dimColor> Running</Text>
-					{Object.entries(buffers)
-						.filter(([_, b]) => b.running)
-						.map(([name], i) => (
+					{taskOrder
+						.filter(name => buffers[name]?.running)
+						.map((name, i) => (
 							<Box key={i} justifyContent="space-between" gap={1}>
 								<Text
 									color={getTaskNameColor(name).color}
@@ -269,9 +270,9 @@ export default function App(props: {config?: string; autoClose?: boolean}) {
 				{Object.entries(buffers).filter(([_, b]) => !b.running).length > 0 && (
 					<Box flexDirection="column">
 						<Text dimColor> Finished</Text>
-						{Object.entries(buffers)
-							.filter(([_, b]) => !b.running)
-							.map(([name], i) => (
+						{taskOrder
+							.filter(name => buffers[name] && !buffers[name].running)
+							.map((name, i) => (
 								<Box key={i} justifyContent="space-between" gap={1}>
 									<Text
 										color={getTaskNameColor(name).color}
