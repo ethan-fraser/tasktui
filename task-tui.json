@@ -1,6 +1,6 @@
 {
 	"tasks": {
-		"sleep": {"command": "sleep 10"},
-		"this is fine": {"command": "echo oh shit"}
+		"thisisfine": {"command": "sleep 5 && echo 'oh shit' && echo 'bye'"},
+		"sleep": {"command": "sleep 3 && exit 1", "ephemeral": true}
 	}
 }
