@@ -185,7 +185,11 @@ export default function App(props: {config?: string; autoClose?: boolean}) {
 				const currentText = prev[name]?.text ?? '';
 				return {
 					...prev,
-					[name]: {running: true, text: currentText + text, errored: false},
+					[name]: {
+						running: true,
+						text: currentText + text + '\n',
+						errored: false,
+					},
 				};
 			});
 		});
