@@ -8,75 +8,75 @@ const ui = createUI();
 const state = createState();
 
 function handleMove(steps: number): void {
-	const allTasks = getAllTasksInOrder(state);
-	if (allTasks.length === 0) return;
+  const allTasks = getAllTasksInOrder(state);
+  if (allTasks.length === 0) return;
 
-	const selectedIndex = allTasks.indexOf(state.selectedTask);
-	const newIndex = (selectedIndex + steps + allTasks.length) % allTasks.length;
-	const newTask = allTasks[newIndex];
-	if (newTask) {
-		state.selectedTask = newTask;
-		render(ui, state);
-	}
+  const selectedIndex = allTasks.indexOf(state.selectedTask);
+  const newIndex = (selectedIndex + steps + allTasks.length) % allTasks.length;
+  const newTask = allTasks[newIndex];
+  if (newTask) {
+    state.selectedTask = newTask;
+    render(ui, state);
+  }
 }
 
 export function loadAndProcessConfig(configPath?: string) {
-	try {
-		const config = loadConfig(configPath);
-		state.config = config;
-		const tasks = config?.tasks ?? {};
+  try {
+    const config = loadConfig(configPath);
+    state.config = config;
+    const tasks = config?.tasks ?? {};
 
-		if (!Object.keys(tasks).length && state.init) {
-			cleanup(state);
-			process.exit(0);
-		}
+    if (!Object.keys(tasks).length && state.init) {
+      cleanup(state);
+      process.exit(0);
+    }
 
-		state.init = true;
-		state.tasks = tasks;
+    state.init = true;
+    state.tasks = tasks;
 
-		// Process tasks
-		for (const [name, task] of Object.entries(tasks)) {
-			if (state.spawnedTasks.has(name)) continue;
-			state.spawnedTasks.add(name);
+    // Process tasks
+    for (const [name, task] of Object.entries(tasks)) {
+      if (state.spawnedTasks.has(name)) continue;
+      state.spawnedTasks.add(name);
 
-			if (task.dependsOn.length) {
-				const allDepsExist = ensureDependencies(name, task.dependsOn, state);
-				if (!allDepsExist) continue;
-				state.queue.push({
-					name,
-					task,
-					remainingDeps: task.dependsOn,
-				});
-				continue;
-			}
+      if (task.dependsOn.length) {
+        const allDepsExist = ensureDependencies(name, task.dependsOn, state);
+        if (!allDepsExist) continue;
+        state.queue.push({
+          name,
+          task,
+          remainingDeps: task.dependsOn,
+        });
+        continue;
+      }
 
-			spawnTask(name, task, state, () => render(ui, state));
-		}
+      spawnTask(name, task, state, () => render(ui, state));
+    }
 
-		render(ui, state);
-	} catch (e) {
-		const error = ensureError(e);
-		showError(error.message, ui, state);
-	}
+    render(ui, state);
+  } catch (e) {
+    const error = ensureError(e);
+    showError(error.message, ui, state);
+  }
 }
 
 // Key bindings
 ui.screen.key(['up', 'k'], () => {
-	handleMove(-1);
+  handleMove(-1);
 });
 
 ui.screen.key(['down', 'j'], () => {
-	handleMove(1);
+  handleMove(1);
 });
 
 ui.screen.key(['C-c', 'q'], () => {
-	cleanup(state);
-	process.exit(0);
+  cleanup(state);
+  process.exit(0);
 });
 
 // Handle resize
 ui.screen.on('resize', () => {
-	render(ui, state);
+  render(ui, state);
 });
 
 export default ui;
