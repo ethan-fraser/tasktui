@@ -1,6 +1,7 @@
 import z from 'zod';
 
 export const TaskSchema = z.object({
+	name: z.string(),
 	command: z.string(),
 	args: z.string().array(),
 });

@@ -1,6 +1,6 @@
 import {Box, Text} from 'ink';
 import React, {useEffect, useState} from 'react';
-// import SubprocessOutput from './components/SubprocessOutput.js';
+import SubprocessOutput from './components/SubprocessOutput.js';
 import {TasksConfig} from './lib/types.js';
 import {ensureError, loadConfig} from './lib/utils.js';
 
@@ -26,11 +26,19 @@ export default function App(props: {config?: string}) {
 				borderBottom={false}
 				borderLeft={false}
 				borderStyle="single"
+				flexDirection="column"
+				paddingRight={1}
 			>
-				<Text>{JSON.stringify(config)}</Text>
+				{config?.tasks.map((task, i) => (
+					<Text key={i}>{task.name}</Text>
+				))}
 			</Box>
 
-			{/* <SubprocessOutput command={{ command: 'echo', args: ['Hello, world!']}} /> */}
+			<Box flexDirection="column">
+				{config?.tasks.map((task, i) => (
+					<SubprocessOutput key={i} command={task} />
+				))}
+			</Box>
 		</Box>
 	);
 }

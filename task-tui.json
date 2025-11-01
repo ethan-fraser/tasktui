@@ -1,1 +1,14 @@
-{}
+{
+	"tasks": [
+		{
+			"name": "Print",
+			"command": "echo",
+			"args": ["string"]
+		},
+		{
+			"name": "PWD",
+			"command": "pwd",
+			"args": []
+		}
+	]
+}
