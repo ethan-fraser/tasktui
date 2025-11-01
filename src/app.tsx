@@ -22,6 +22,10 @@ export default function App(props: {config?: string; autoClose?: boolean}) {
 
 	const init = useRef(false);
 	const spawnedTasks = useRef(new Set<string>());
+	const childProcesses = useRef<Map<string, childProcess.ChildProcess>>(
+		new Map(),
+	);
+
 	const [taskOrder, setTaskOrder] = useState<string[]>([]);
 	const [config, setConfig] = useState<TasksConfig>();
 	const [tasks, setTasks] = useState<Record<string, Task>>({});
@@ -47,6 +51,11 @@ export default function App(props: {config?: string; autoClose?: boolean}) {
 
 		// Exit alternate screen mode when component unmounts
 		return () => {
+			for (const [_, proc] of childProcesses.current.entries()) {
+				if (!proc.killed) {
+					proc.kill('SIGTERM');
+				}
+			}
 			stdout.write('\x1b[2J\x1b[3J\x1b[H');
 			exit();
 		};
@@ -127,7 +136,11 @@ export default function App(props: {config?: string; autoClose?: boolean}) {
 		}
 
 		if (key.ctrl && input === 'c') {
-			// Handle Ctrl+C
+			for (const [_, proc] of childProcesses.current.entries()) {
+				if (!proc.killed) {
+					proc.kill('SIGTERM');
+				}
+			}
 			process.exit(0);
 		}
 	});
@@ -155,6 +168,7 @@ export default function App(props: {config?: string; autoClose?: boolean}) {
 		const subProcess = childProcess.spawn('sh', ['-c', task.command], {
 			cwd: task.cwd,
 		});
+		childProcesses.current.set(name, subProcess);
 		subProcess.on('spawn', () => {
 			setBuffers(prev => {
 				if (!Object.keys(prev).length) {
@@ -281,7 +295,7 @@ export default function App(props: {config?: string; autoClose?: boolean}) {
 
 			<Box flexDirection="column" flexGrow={1}>
 				<Text dimColor>{selectedTask}</Text>
-				<Text>{buffers[selectedTask]?.text ?? ''}</Text>
+				<Text wrap="truncate">{buffers[selectedTask]?.text ?? ''}</Text>
 			</Box>
 		</Box>
 	);
