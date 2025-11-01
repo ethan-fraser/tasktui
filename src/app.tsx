@@ -29,15 +29,17 @@ export default function App(props: {config?: string}) {
 				flexDirection="column"
 				paddingRight={1}
 			>
-				{config?.tasks.map((task, i) => (
-					<Text key={i}>{task.name}</Text>
-				))}
+				{config &&
+					Object.keys(config.tasks).map((name, i) => (
+						<Text key={i}>{name}</Text>
+					))}
 			</Box>
 
 			<Box flexDirection="column">
-				{config?.tasks.map((task, i) => (
-					<SubprocessOutput key={i} command={task} />
-				))}
+				{config &&
+					Object.values(config.tasks).map((task, i) => (
+						<SubprocessOutput key={i} command={task.command} />
+					))}
 			</Box>
 		</Box>
 	);

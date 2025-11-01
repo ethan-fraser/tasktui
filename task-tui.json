@@ -1,14 +1,13 @@
 {
-	"tasks": [
-		{
-			"name": "Print",
-			"command": "echo",
-			"args": ["string"]
+	"tasks": {
+		"print": {
+			"command": "echo \"Hello, world!\""
 		},
-		{
-			"name": "PWD",
-			"command": "pwd",
-			"args": []
+		"pwd": {
+			"command": "pwd"
+		},
+		"wc": {
+			"command": "cat src/app.tsx | wc -l"
 		}
-	]
+	}
 }
