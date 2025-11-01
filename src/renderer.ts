@@ -1,4 +1,4 @@
-import { AppState, getTaskNameColor } from './state.js';
+import { AppState, getOrderedTasks } from './state.js';
 import { UIComponents } from './ui.js';
 
 export function showError(message: string, ui: UIComponents, state: AppState) {
@@ -9,29 +9,58 @@ export function showError(message: string, ui: UIComponents, state: AppState) {
 }
 
 export function render(ui: UIComponents, state: AppState): void {
-	const taskListContent = state.taskOrder
-		.map((name) => {
-			const color = getTaskNameColor(name, state);
-			const indicator = name === state.selectedTask ? '»' : ' ';
-			return `{${color}}${name}{/} ${indicator}`;
-		})
-		.join('\n');
-	ui.taskList.setContent(taskListContent);
+	const { running, queued, completed } = getOrderedTasks(state);
+	const lines: string[] = [];
 
-	// Update queue
-	if (state.queue.length > 0) {
-		const queueContent =
-			'{gray-fg} Queue{/}\n' +
-			state.queue
-				.map(({ name, remainingDeps }) => {
-					return `{gray-fg}${name} (${remainingDeps.length}){/}`;
-				})
-				.join('\n');
-		ui.queueContainer.setContent(queueContent);
-		ui.queueContainer.show();
-	} else {
-		ui.queueContainer.hide();
+	// Running section
+	if (running.length > 0) {
+		lines.push(`{gray-fg}Running (${running.length}){/}`);
+		for (const name of running) {
+			const isSelected = name === state.selectedTask;
+			const symbol = isSelected ? '›' : ' ';
+			const color = isSelected ? 'yellow-fg' : 'white-fg';
+			lines.push(`{${color}}${symbol} ${name}{/}`);
+		}
+		lines.push('');
 	}
+
+	// Queued section
+	if (queued.length > 0) {
+		lines.push(`{gray-fg}Queued (${queued.length}){/}`);
+		for (const queueItem of queued) {
+			const isSelected = queueItem.name === state.selectedTask;
+			const symbol = isSelected ? '›' : ' ';
+			const color = isSelected ? 'yellow-fg' : 'gray-fg';
+			lines.push(`{${color}}${symbol} ${queueItem.name}{/}`);
+		}
+		lines.push('');
+	}
+
+	// Completed section
+	if (completed.length > 0) {
+		lines.push(`{gray-fg}Completed (${completed.length}){/}`);
+		for (const name of completed) {
+			const buffer = state.buffers[name];
+			const isSelected = name === state.selectedTask;
+			const symbol = isSelected ? '›' : ' ';
+
+			let statusSymbol = '✓';
+			let color = 'green-fg';
+
+			if (buffer?.errored) {
+				statusSymbol = '✗';
+				color = 'red-fg';
+			}
+
+			if (isSelected) {
+				color = 'yellow-fg';
+			}
+
+			lines.push(`{${color}}${symbol} ${statusSymbol} ${name}{/}`);
+		}
+	}
+
+	ui.taskList.setContent(lines.join('\n'));
 
 	// Update output pane
 	if (state.selectedTask) {

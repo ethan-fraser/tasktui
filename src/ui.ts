@@ -39,16 +39,6 @@ export function createUI(): UIComponents {
 		},
 	});
 
-	// Tasks list header
-	blessed.box({
-		parent: sidebar,
-		top: 0,
-		width: '100%',
-		height: 1,
-		content: '{gray-fg}Tasks{/}',
-		tags: true,
-	});
-
 	// Tasks list
 	const taskList = blessed.box({
 		parent: sidebar,
@@ -73,7 +63,7 @@ export function createUI(): UIComponents {
 		bottom: 0,
 		width: '100%',
 		height: 1,
-		content: '{gray-fg}↑ ↓ - Select{/}',
+		content: '{gray-fg}↑↓ - Navigate{/}',
 		tags: true,
 	});
 

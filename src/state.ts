@@ -41,11 +41,25 @@ export function createState(): AppState {
 	};
 }
 
-export function getTaskNameColor(task: string, state: AppState): string {
-	const buffer = state.buffers[task];
-	if (!buffer) return 'white-fg';
-	if (state.selectedTask === task) return 'yellow-fg';
-	if (buffer.errored) return 'red-fg';
-	if (buffer.running) return 'white-fg';
-	return 'gray-fg';
+export function getOrderedTasks(state: AppState): {
+	running: string[];
+	queued: QueueItem[];
+	completed: string[];
+} {
+	const running = state.taskOrder.filter(
+		(name) => state.buffers[name]?.running,
+	);
+
+	const queued = state.queue;
+
+	const completed = state.taskOrder.filter(
+		(name) => state.buffers[name] && !state.buffers[name].running,
+	);
+
+	return { running, queued, completed };
+}
+
+export function getAllTasksInOrder(state: AppState): string[] {
+	const { running, queued, completed } = getOrderedTasks(state);
+	return [...running, ...queued.map((q) => q.name), ...completed];
 }

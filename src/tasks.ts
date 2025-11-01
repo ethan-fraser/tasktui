@@ -15,6 +15,7 @@ export function ensureDependencies(
 				text: `Cannot depend on ${dep} as it does not exist`,
 				errored: true,
 			};
+			state.taskOrder.push(task);
 			allDepsExist = false;
 			break;
 		}
@@ -43,7 +44,7 @@ export function spawnTask(
 			state.selectedTask = name;
 		}
 		state.buffers[name] = { running: true, text: '', errored: false };
-		state.taskOrder.unshift(name);
+		state.taskOrder.push(name);
 		onUpdate();
 	});
 
@@ -67,7 +68,7 @@ export function spawnTask(
 		state.buffers[name] = {
 			running: false,
 			text: currentText + `\nDone (exit code: ${code})`,
-			errored: code ? code > 0 : false,
+			errored: code !== null && code !== 0,
 		};
 		state.childProcesses.delete(name);
 

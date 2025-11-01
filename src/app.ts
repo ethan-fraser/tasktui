@@ -1,5 +1,5 @@
 import { render, showError } from './renderer.js';
-import { createState } from './state.js';
+import { createState, getAllTasksInOrder } from './state.js';
 import { cleanup, ensureDependencies, spawnTask } from './tasks.js';
 import { createUI } from './ui.js';
 import { ensureError, loadConfig } from './utils.js';
@@ -8,10 +8,12 @@ const ui = createUI();
 const state = createState();
 
 function handleMove(steps: number): void {
-	const selectedIndex = state.taskOrder.indexOf(state.selectedTask);
-	const newIndex =
-		(selectedIndex + steps + state.taskOrder.length) % state.taskOrder.length;
-	const newTask = state.taskOrder[newIndex];
+	const allTasks = getAllTasksInOrder(state);
+	if (allTasks.length === 0) return;
+
+	const selectedIndex = allTasks.indexOf(state.selectedTask);
+	const newIndex = (selectedIndex + steps + allTasks.length) % allTasks.length;
+	const newTask = allTasks[newIndex];
 	if (newTask) {
 		state.selectedTask = newTask;
 		render(ui, state);
