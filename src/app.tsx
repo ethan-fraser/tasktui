@@ -16,11 +16,12 @@ interface QueueItem {
 	remainingDeps: string[];
 }
 
-export default function App(props: {config?: string}) {
+export default function App(props: {config?: string; autoClose?: boolean}) {
 	const {stdout} = useStdout();
 	const {exit} = useApp();
 
 	const init = useRef(false);
+	const spawnedTasks = useRef(new Set<string>());
 	const [config, setConfig] = useState<TasksConfig>();
 	const [tasks, setTasks] = useState<Record<string, Task>>({});
 	const [error, setError] = useState<string | null>(null);
@@ -61,6 +62,9 @@ export default function App(props: {config?: string}) {
 
 	useEffect(() => {
 		for (const [name, task] of Object.entries(tasks)) {
+			if (spawnedTasks.current.has(name)) continue; // Already spawned
+			spawnedTasks.current.add(name);
+
 			if (task.dependsOn.length) {
 				let allDepsExist = ensureDependencies(name, task.dependsOn);
 				if (!allDepsExist) continue;
