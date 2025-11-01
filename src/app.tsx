@@ -250,18 +250,8 @@ export default function App(props: {config?: string; autoClose?: boolean}) {
 						<Text dimColor> Queue</Text>
 						{queue.map(({name, remainingDeps}, i) => (
 							<Box key={i} justifyContent="space-between" gap={1}>
-								<Text
-									color={getTaskNameColor(name).color}
-									dimColor={getTaskNameColor(name).dim}
-								>
-									{name}
-								</Text>
-								<Text
-									color={getTaskNameColor(name).color}
-									dimColor={getTaskNameColor(name).dim}
-								>
-									({remainingDeps.length})
-								</Text>
+								<Text dimColor>{name}</Text>
+								<Text dimColor>({remainingDeps.length})</Text>
 							</Box>
 						))}
 					</Box>
@@ -273,20 +263,13 @@ export default function App(props: {config?: string; autoClose?: boolean}) {
 						{taskOrder
 							.filter(name => buffers[name] && !buffers[name].running)
 							.map((name, i) => (
-								<Box key={i} justifyContent="space-between" gap={1}>
-									<Text
-										color={getTaskNameColor(name).color}
-										dimColor={getTaskNameColor(name).dim}
-									>
-										{name}
-									</Text>
-									<Text
-										color={getTaskNameColor(name).color}
-										dimColor={getTaskNameColor(name).dim}
-									>
-										»
-									</Text>
-								</Box>
+								<Text
+									key={i}
+									color={getTaskNameColor(name).color}
+									dimColor={getTaskNameColor(name).dim}
+								>
+									{name}
+								</Text>
 							))}
 					</Box>
 				)}
