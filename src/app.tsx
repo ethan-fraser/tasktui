@@ -28,6 +28,17 @@ export default function App(props: {config?: string; autoClose?: boolean}) {
 	const [selectedTask, setSelectedTask] = useState<string>('');
 	const [buffers, setBuffers] = useState<Record<string, TaskBuffer>>({});
 	const [queue, setQueue] = useState<QueueItem[]>([]);
+	const [, setResize] = useState(0);
+
+	useEffect(() => {
+		const handleResize = () => {
+			setResize(prev => prev + 1); // Force re-render
+		};
+		stdout.on('resize', handleResize);
+		return () => {
+			stdout.off('resize', handleResize);
+		};
+	}, [stdout]);
 
 	useEffect(() => {
 		// Enter alternate screen mode
