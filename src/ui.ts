@@ -1,0 +1,165 @@
+import blessed from 'blessed';
+
+export interface UIComponents {
+	screen: blessed.Widgets.Screen;
+	sidebar: blessed.Widgets.BoxElement;
+	runningList: blessed.Widgets.BoxElement;
+	queueContainer: blessed.Widgets.BoxElement;
+	finishedContainer: blessed.Widgets.BoxElement;
+	taskNameBox: blessed.Widgets.BoxElement;
+	taskOutputBox: blessed.Widgets.Log;
+	errorBox: blessed.Widgets.BoxElement;
+}
+
+export function createUI(): UIComponents {
+	// Create screen
+	const screen = blessed.screen({
+		smartCSR: true,
+		title: 'Task Runner',
+		fullUnicode: true,
+	});
+
+	// Create sidebar container
+	const sidebar = blessed.box({
+		parent: screen,
+		left: 0,
+		top: 0,
+		width: 25,
+		height: '100%',
+	});
+
+	// Add a vertical line separator
+	blessed.line({
+		parent: screen,
+		orientation: 'vertical',
+		left: 24,
+		top: 0,
+		height: '100%',
+		style: {
+			fg: 'white',
+		},
+	});
+
+	// Running section header
+	blessed.box({
+		parent: sidebar,
+		top: 0,
+		width: '100%',
+		height: 1,
+		content: '{gray-fg} Running{/}',
+		tags: true,
+	});
+
+	// Running list
+	const runningList = blessed.box({
+		parent: sidebar,
+		top: 1,
+		width: '100%',
+		height: 'shrink',
+		tags: true,
+	});
+
+	// Queue section
+	const queueContainer = blessed.box({
+		parent: sidebar,
+		top: 'center',
+		width: '100%',
+		height: 'shrink',
+		tags: true,
+	});
+
+	// Finished section
+	const finishedContainer = blessed.box({
+		parent: sidebar,
+		bottom: 2,
+		width: '100%',
+		height: 'shrink',
+		tags: true,
+	});
+
+	// Help text at bottom
+	blessed.box({
+		parent: sidebar,
+		bottom: 0,
+		width: '100%',
+		height: 1,
+		content: '{gray-fg}↑ ↓ - Select{/}',
+		tags: true,
+	});
+
+	// Output pane container
+	const outputPane = blessed.box({
+		parent: screen,
+		left: 25,
+		top: 0,
+		width: '100%-25',
+		height: '100%',
+	});
+
+	// Task name header
+	const taskNameBox = blessed.box({
+		parent: outputPane,
+		top: 0,
+		width: '100%',
+		height: 1,
+		content: '',
+		tags: true,
+		style: {
+			fg: 'gray',
+		},
+	});
+
+	// Task output (scrollable log)
+	const taskOutputBox = blessed.log({
+		parent: outputPane,
+		top: 1,
+		width: '100%',
+		height: '100%-1',
+		scrollable: true,
+		alwaysScroll: true,
+		scrollbar: {
+			ch: '█',
+			style: {
+				fg: 'yellow',
+			},
+		},
+		keys: true,
+		vi: true,
+		mouse: true,
+		tags: true,
+	});
+
+	// Error display
+	const errorBox = blessed.box({
+		parent: screen,
+		top: 'center',
+		left: 'center',
+		width: '80%',
+		height: 'shrink',
+		border: {
+			type: 'line',
+		},
+		style: {
+			fg: 'red',
+			border: {
+				fg: 'red',
+			},
+		},
+		tags: true,
+		hidden: true,
+	});
+
+	// Focus on output box for scrolling
+	taskOutputBox.focus();
+
+	return {
+		screen,
+		sidebar,
+		runningList,
+		queueContainer,
+		finishedContainer,
+		taskNameBox,
+		taskOutputBox,
+		errorBox,
+	};
+}
