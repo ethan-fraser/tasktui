@@ -20,7 +20,7 @@ function handleMove(steps: number): void {
   }
 }
 
-export function loadAndProcessConfig(configPath?: string) {
+function loadAndProcessConfig(configPath?: string) {
   try {
     const config = loadConfig(configPath);
     state.config = config;
@@ -88,3 +88,8 @@ ui.screen.on('resize', () => {
 });
 
 export default ui;
+
+export function initialize(configPath?: string) {
+  loadAndProcessConfig(configPath);
+  ui.screen.render();
+}
