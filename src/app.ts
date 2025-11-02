@@ -1,4 +1,4 @@
-import { render, showError } from './renderer.js';
+import { render, showError, toggleKeybindsMenu } from './renderer.js';
 import { createState, getAllTasksInOrder } from './state.js';
 import { cleanup, ensureDependencies, spawnTask } from './tasks.js';
 import { createUI } from './ui.js';
@@ -56,7 +56,7 @@ export function loadAndProcessConfig(configPath?: string) {
     render(ui, state);
   } catch (e) {
     const error = ensureError(e);
-    showError(error.message, ui, state);
+    showError(error.message, ui);
   }
 }
 
@@ -72,6 +72,14 @@ ui.screen.key(['down', 'j'], () => {
 ui.screen.key(['C-c', 'q'], () => {
   cleanup(state);
   process.exit(0);
+});
+
+ui.screen.key('m', () => {
+  toggleKeybindsMenu(ui);
+});
+
+ui.screen.key('escape', () => {
+  if (!ui.keybindsBox.hidden) toggleKeybindsMenu(ui);
 });
 
 // Handle resize

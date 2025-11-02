@@ -20,7 +20,6 @@ export interface AppState {
   taskOrder: string[];
   config?: TasksConfig;
   tasks: Record<string, Task>;
-  error: string | null;
   selectedTask: string;
   buffers: Record<string, TaskBuffer>;
   queue: QueueItem[];
@@ -34,7 +33,6 @@ export function createState(): AppState {
     taskOrder: [],
     config: undefined,
     tasks: {},
-    error: null,
     selectedTask: '',
     buffers: {},
     queue: [],

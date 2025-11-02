@@ -82,7 +82,7 @@ export function spawnTask(
 
   subProcess.on('error', (e) => {
     const error = ensureError(e);
-    showError(error.message, ui, state);
+    showError(error.message, ui);
   });
 }
 

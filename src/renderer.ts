@@ -1,10 +1,23 @@
 import { AppState, getOrderedTasks } from './state.js';
 import { UIComponents } from './ui.js';
 
-export function showError(message: string, ui: UIComponents, state: AppState) {
-  state.error = message;
+export function showError(message: string, ui: UIComponents) {
   ui.errorBox.setContent(`{red-fg}Error: ${message}{/}`);
   ui.errorBox.show();
+  ui.screen.render();
+}
+
+export function toggleKeybindsMenu(ui: UIComponents) {
+  if (ui.keybindsBox.hidden) {
+    ui.keybindsBox.show();
+  } else {
+    ui.keybindsBox.hide();
+  }
+  ui.screen.render();
+}
+
+export function hideKeybinds(ui: UIComponents) {
+  ui.errorBox.hide();
   ui.screen.render();
 }
 

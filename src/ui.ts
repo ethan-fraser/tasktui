@@ -8,6 +8,7 @@ export interface UIComponents {
   taskNameBox: blessed.Widgets.BoxElement;
   taskOutputBox: blessed.Widgets.Log;
   errorBox: blessed.Widgets.BoxElement;
+  keybindsBox: blessed.Widgets.BoxElement;
 }
 
 export function createUI(): UIComponents {
@@ -61,8 +62,8 @@ export function createUI(): UIComponents {
     parent: sidebar,
     bottom: 0,
     width: '100%',
-    height: 1,
-    content: '{gray-fg}↑↓ - Navigate{/}',
+    height: 2,
+    content: '{gray-fg}↑↓ - Navigate\nm - More binds{/}',
     tags: true,
   });
 
@@ -128,6 +129,20 @@ export function createUI(): UIComponents {
     hidden: true,
   });
 
+  // Error display
+  const keybindsBox = blessed.box({
+    parent: screen,
+    top: 'center',
+    left: 'center',
+    width: '80%',
+    height: 'shrink',
+    border: {
+      type: 'line',
+    },
+    tags: true,
+    hidden: true,
+  });
+
   // Focus on output box for scrolling
   taskOutputBox.focus();
 
@@ -139,5 +154,6 @@ export function createUI(): UIComponents {
     taskNameBox,
     taskOutputBox,
     errorBox,
+    keybindsBox,
   };
 }
