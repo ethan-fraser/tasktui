@@ -1,6 +1,6 @@
 #!/usr/bin/env node
 import meow from 'meow';
-import ui, { loadAndProcessConfig } from './app.js';
+import { initialize } from './app.js';
 
 const cli = meow(
   `
@@ -21,5 +21,4 @@ const cli = meow(
   },
 );
 
-loadAndProcessConfig(cli.flags.config);
-ui.screen.render();
+initialize(cli.flags.config);

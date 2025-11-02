@@ -1,4 +1,5 @@
 import blessed from 'blessed';
+import { KEYBINDS } from './constants.js';
 
 export interface UIComponents {
   screen: blessed.Widgets.Screen;
@@ -8,6 +9,7 @@ export interface UIComponents {
   taskNameBox: blessed.Widgets.BoxElement;
   taskOutputBox: blessed.Widgets.Log;
   errorBox: blessed.Widgets.BoxElement;
+  keybindsBox: blessed.Widgets.BoxElement;
 }
 
 export function createUI(): UIComponents {
@@ -61,8 +63,8 @@ export function createUI(): UIComponents {
     parent: sidebar,
     bottom: 0,
     width: '100%',
-    height: 1,
-    content: '{gray-fg}↑↓ - Navigate{/}',
+    height: 2,
+    content: '{gray-fg}↑↓ - Navigate\nm - More binds{/}',
     tags: true,
   });
 
@@ -128,6 +130,37 @@ export function createUI(): UIComponents {
     hidden: true,
   });
 
+  // Keybinds display
+  const keybindsBox = blessed.box({
+    parent: screen,
+    top: 'center',
+    left: 'center',
+    width: '80%',
+    height: 'shrink',
+    border: {
+      type: 'line',
+    },
+    tags: true,
+    hidden: true,
+  });
+
+  // Keybinds title
+  blessed.box({
+    parent: keybindsBox,
+    top: -1,
+    left: 1,
+    width: 'shrink',
+    content: ' Keybinds ',
+  });
+
+  // Keybinds list
+  blessed.box({
+    parent: keybindsBox,
+    top: 1,
+    left: 2,
+    content: KEYBINDS.join('\n'),
+  });
+
   // Focus on output box for scrolling
   taskOutputBox.focus();
 
@@ -139,5 +172,6 @@ export function createUI(): UIComponents {
     taskNameBox,
     taskOutputBox,
     errorBox,
+    keybindsBox,
   };
 }

@@ -1,5 +1,4 @@
 import childProcess from 'node:child_process';
-import ui from './app.js';
 import { showError } from './renderer.js';
 import { AppState, QueueItem } from './state.js';
 import { Task } from './types.js';
@@ -82,7 +81,7 @@ export function spawnTask(
 
   subProcess.on('error', (e) => {
     const error = ensureError(e);
-    showError(error.message, ui, state);
+    showError(error.message);
   });
 }
 

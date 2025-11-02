@@ -1,3 +1,10 @@
 const CONFIG_PATH = './tasktui.config.json';
 
-export { CONFIG_PATH };
+const KEYBINDS = [
+  'm            - Toggle this help menu',
+  '↑ or k       - Select previous task',
+  '↓ or j       - Select next task',
+  'Ctrl-c or q  - Quit',
+];
+
+export { CONFIG_PATH, KEYBINDS };

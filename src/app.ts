@@ -1,4 +1,4 @@
-import { render, showError } from './renderer.js';
+import { render, showError, toggleKeybindsMenu } from './renderer.js';
 import { createState, getAllTasksInOrder } from './state.js';
 import { cleanup, ensureDependencies, spawnTask } from './tasks.js';
 import { createUI } from './ui.js';
@@ -16,11 +16,11 @@ function handleMove(steps: number): void {
   const newTask = allTasks[newIndex];
   if (newTask) {
     state.selectedTask = newTask;
-    render(ui, state);
+    render(state);
   }
 }
 
-export function loadAndProcessConfig(configPath?: string) {
+function loadAndProcessConfig(configPath?: string) {
   try {
     const config = loadConfig(configPath);
     state.config = config;
@@ -50,13 +50,13 @@ export function loadAndProcessConfig(configPath?: string) {
         continue;
       }
 
-      spawnTask(name, task, state, () => render(ui, state));
+      spawnTask(name, task, state, () => render(state));
     }
 
-    render(ui, state);
+    render(state);
   } catch (e) {
     const error = ensureError(e);
-    showError(error.message, ui, state);
+    showError(error.message);
   }
 }
 
@@ -74,9 +74,22 @@ ui.screen.key(['C-c', 'q'], () => {
   process.exit(0);
 });
 
+ui.screen.key('m', () => {
+  toggleKeybindsMenu();
+});
+
+ui.screen.key('escape', () => {
+  if (!ui.keybindsBox.hidden) toggleKeybindsMenu();
+});
+
 // Handle resize
 ui.screen.on('resize', () => {
-  render(ui, state);
+  render(state);
 });
 
 export default ui;
+
+export function initialize(configPath?: string) {
+  loadAndProcessConfig(configPath);
+  ui.screen.render();
+}
