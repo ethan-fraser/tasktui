@@ -35,7 +35,8 @@ export function spawnTask(
     cwd: task.cwd,
     env: {
       ...process.env,
-      FORCE_COLOR: '1',
+      npm_config_color: 'always',
+      FORCE_COLOR: '3',
       CLICOLOR_FORCE: '1',
     },
   });
