@@ -16,7 +16,7 @@ function handleMove(steps: number): void {
   const newTask = allTasks[newIndex];
   if (newTask) {
     state.selectedTask = newTask;
-    render(ui, state);
+    render(state);
   }
 }
 
@@ -50,13 +50,13 @@ export function loadAndProcessConfig(configPath?: string) {
         continue;
       }
 
-      spawnTask(name, task, state, () => render(ui, state));
+      spawnTask(name, task, state, () => render(state));
     }
 
-    render(ui, state);
+    render(state);
   } catch (e) {
     const error = ensureError(e);
-    showError(error.message, ui);
+    showError(error.message);
   }
 }
 
@@ -75,16 +75,16 @@ ui.screen.key(['C-c', 'q'], () => {
 });
 
 ui.screen.key('m', () => {
-  toggleKeybindsMenu(ui);
+  toggleKeybindsMenu();
 });
 
 ui.screen.key('escape', () => {
-  if (!ui.keybindsBox.hidden) toggleKeybindsMenu(ui);
+  if (!ui.keybindsBox.hidden) toggleKeybindsMenu();
 });
 
 // Handle resize
 ui.screen.on('resize', () => {
-  render(ui, state);
+  render(state);
 });
 
 export default ui;

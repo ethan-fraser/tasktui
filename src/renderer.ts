@@ -1,13 +1,13 @@
+import ui from './app.js';
 import { AppState, getOrderedTasks } from './state.js';
-import { UIComponents } from './ui.js';
 
-export function showError(message: string, ui: UIComponents) {
+export function showError(message: string) {
   ui.errorBox.setContent(`{red-fg}Error: ${message}{/}`);
   ui.errorBox.show();
   ui.screen.render();
 }
 
-export function toggleKeybindsMenu(ui: UIComponents) {
+export function toggleKeybindsMenu() {
   if (ui.keybindsBox.hidden) {
     ui.keybindsBox.show();
   } else {
@@ -16,12 +16,12 @@ export function toggleKeybindsMenu(ui: UIComponents) {
   ui.screen.render();
 }
 
-export function hideKeybinds(ui: UIComponents) {
+export function hideKeybinds() {
   ui.errorBox.hide();
   ui.screen.render();
 }
 
-export function render(ui: UIComponents, state: AppState): void {
+export function render(state: AppState): void {
   const { running, queued, completed } = getOrderedTasks(state);
   const lines: string[] = [];
 
