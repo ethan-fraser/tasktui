@@ -1,4 +1,5 @@
 import blessed from 'blessed';
+import { KEYBINDS } from './constants.js';
 
 export interface UIComponents {
   screen: blessed.Widgets.Screen;
@@ -129,7 +130,7 @@ export function createUI(): UIComponents {
     hidden: true,
   });
 
-  // Error display
+  // Keybinds display
   const keybindsBox = blessed.box({
     parent: screen,
     top: 'center',
@@ -141,6 +142,23 @@ export function createUI(): UIComponents {
     },
     tags: true,
     hidden: true,
+  });
+
+  // Keybinds title
+  blessed.box({
+    parent: keybindsBox,
+    top: -1,
+    left: 1,
+    width: 'shrink',
+    content: ' Keybinds ',
+  });
+
+  // Keybinds list
+  blessed.box({
+    parent: keybindsBox,
+    top: 1,
+    left: 2,
+    content: KEYBINDS.join('\n'),
   });
 
   // Focus on output box for scrolling
