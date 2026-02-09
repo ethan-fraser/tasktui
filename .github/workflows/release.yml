@@ -36,7 +36,7 @@ jobs:
       - name: Bump version and create tag
         id: version
         run: |
-          npm version patch -m "chore: release v%s"
+          npm version patch -m "chore: release v%s [skip ci]"
           echo "new_tag=$(git describe --tags --abbrev=0)" >> $GITHUB_OUTPUT
 
       - name: Push changes and tags
