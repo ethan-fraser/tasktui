@@ -7,4 +7,6 @@ const KEYBINDS = [
   'Ctrl-c or q  - Quit',
 ];
 
-export { CONFIG_PATH, KEYBINDS };
+const CLEANUP_TIMEOUT = 10000;
+
+export { CLEANUP_TIMEOUT, CONFIG_PATH, KEYBINDS };
