@@ -1,4 +1,5 @@
 import fs from 'node:fs';
+import { createRequire } from 'node:module';
 import path from 'node:path';
 import z from 'zod';
 import { CONFIG_PATH } from './constants.js';
@@ -41,4 +42,10 @@ export function ensureError(error: unknown): Error {
   } catch {}
 
   return new Error(stringified);
+}
+
+export function getPackageVersion() {
+  const require = createRequire(import.meta.url);
+  const packageJSON = require('../package.json');
+  return `v${packageJSON.version}`;
 }
