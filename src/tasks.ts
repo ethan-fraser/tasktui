@@ -34,6 +34,7 @@ export function spawnTask(
 ): void {
   const subProcess = childProcess.spawn('sh', ['-c', task.command], {
     cwd: task.cwd,
+    detached: true,
     env: {
       ...process.env,
       npm_config_color: 'always',
@@ -107,6 +108,18 @@ function checkQueue(state: AppState, onUpdate: () => void): void {
   state.queue = next;
 }
 
+function killProcessGroup(
+  pid: number | undefined,
+  signal: NodeJS.Signals,
+): void {
+  if (!pid) return;
+  try {
+    process.kill(-pid, signal);
+  } catch {
+    // Process group already exited
+  }
+}
+
 export async function cleanup(state: AppState): Promise<void> {
   const processes = [...state.childProcesses.entries()].filter(
     ([_, proc]) => !proc.killed,
@@ -118,7 +131,7 @@ export async function cleanup(state: AppState): Promise<void> {
     ([_, proc]) =>
       new Promise<void>((resolve) => {
         proc.on('close', resolve);
-        proc.kill('SIGINT');
+        killProcessGroup(proc.pid, 'SIGINT');
       }),
   );
 
@@ -134,7 +147,7 @@ export async function cleanup(state: AppState): Promise<void> {
   if (result === 'timeout') {
     for (const [_, proc] of processes) {
       if (!proc.killed) {
-        proc.kill('SIGKILL');
+        killProcessGroup(proc.pid, 'SIGKILL');
       }
     }
   }
