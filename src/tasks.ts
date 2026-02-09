@@ -106,10 +106,35 @@ function checkQueue(state: AppState, onUpdate: () => void): void {
   state.queue = next;
 }
 
-export function cleanup(state: AppState): void {
-  for (const [_, proc] of state.childProcesses.entries()) {
-    if (!proc.killed) {
-      proc.kill('SIGTERM');
+export async function cleanup(state: AppState): Promise<void> {
+  const processes = [...state.childProcesses.entries()].filter(
+    ([_, proc]) => !proc.killed,
+  );
+
+  if (processes.length === 0) return;
+
+  const exitPromises = processes.map(
+    ([_, proc]) =>
+      new Promise<void>((resolve) => {
+        proc.on('close', resolve);
+        proc.kill('SIGTERM');
+      }),
+  );
+
+  const timeout = new Promise<'timeout'>((resolve) =>
+    setTimeout(() => resolve('timeout'), 5000),
+  );
+
+  const result = await Promise.race([
+    Promise.all(exitPromises).then(() => 'done' as const),
+    timeout,
+  ]);
+
+  if (result === 'timeout') {
+    for (const [_, proc] of processes) {
+      if (!proc.killed) {
+        proc.kill('SIGKILL');
+      }
     }
   }
 }

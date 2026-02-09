@@ -20,14 +20,14 @@ function handleMove(steps: number): void {
   }
 }
 
-function loadAndProcessConfig(configPath?: string) {
+async function loadAndProcessConfig(configPath?: string) {
   try {
     const config = loadConfig(configPath);
     state.config = config;
     const tasks = config?.tasks ?? {};
 
     if (!Object.keys(tasks).length && state.init) {
-      cleanup(state);
+      await cleanup(state);
       process.exit(0);
     }
 
@@ -69,8 +69,8 @@ ui.screen.key(['down', 'j'], () => {
   handleMove(1);
 });
 
-ui.screen.key(['C-c', 'q'], () => {
-  cleanup(state);
+ui.screen.key(['C-c', 'q'], async () => {
+  await cleanup(state);
   process.exit(0);
 });
 
