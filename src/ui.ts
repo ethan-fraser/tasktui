@@ -1,5 +1,6 @@
 import blessed from 'blessed';
 import { KEYBINDS } from './constants.js';
+import { getPackageVersion } from './utils.js';
 
 export interface UIComponents {
   screen: blessed.Widgets.Screen;
@@ -151,6 +152,15 @@ export function createUI(): UIComponents {
     left: 1,
     width: 'shrink',
     content: ' Keybinds ',
+  });
+
+  blessed.box({
+    parent: keybindsBox,
+    top: -1,
+    right: 1,
+    width: 'shrink',
+    align: 'right',
+    content: getPackageVersion(),
   });
 
   // Keybinds list
