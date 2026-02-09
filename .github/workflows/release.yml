@@ -45,11 +45,8 @@ jobs:
       - name: Bump version and create tag
         if: steps.check.outputs.skip == 'false'
         run: |
+          git pull --rebase
           npm version patch -m "chore: release v%s [skip ci]"
-
-      - name: Push changes and tags
-        if: steps.check.outputs.skip == 'false'
-        run: |
           git push
           git push --tags
 
