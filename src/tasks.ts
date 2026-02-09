@@ -1,4 +1,5 @@
 import childProcess from 'node:child_process';
+import { CLEANUP_TIMEOUT } from './constants.js';
 import { showError } from './renderer.js';
 import { AppState, QueueItem } from './state.js';
 import { Task } from './types.js';
@@ -122,7 +123,7 @@ export async function cleanup(state: AppState): Promise<void> {
   );
 
   const timeout = new Promise<'timeout'>((resolve) =>
-    setTimeout(() => resolve('timeout'), 5000),
+    setTimeout(() => resolve('timeout'), CLEANUP_TIMEOUT),
   );
 
   const result = await Promise.race([
