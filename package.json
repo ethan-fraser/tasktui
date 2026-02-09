@@ -1,7 +1,7 @@
 {
   "name": "tasktui",
   "description": "Run tasks in a multiplexed terminal with dependency management.",
-  "version": "1.0.22",
+  "version": "1.0.23",
   "license": "MIT",
   "bin": "dist/cli.js",
   "type": "module",
