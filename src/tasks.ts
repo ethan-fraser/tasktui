@@ -118,7 +118,7 @@ export async function cleanup(state: AppState): Promise<void> {
     ([_, proc]) =>
       new Promise<void>((resolve) => {
         proc.on('close', resolve);
-        proc.kill('SIGTERM');
+        proc.kill('SIGINT');
       }),
   );
 
